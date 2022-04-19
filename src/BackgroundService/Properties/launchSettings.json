@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "BackgroundService": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "APPLICATIONINSIGHTS_CONNECTION_STRING": "InstrumentationKey=;IngestionEndpoint="
+      }
+    }
+  }
+}

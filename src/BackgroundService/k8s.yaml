@@ -1,0 +1,48 @@
+﻿apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  # "namespace" omitted since ClusterRoles are not namespaced
+  name: appinsight-logging-property-reader
+rules:
+- apiGroups: ["", "extensions", "apps"]
+  resources: ["pods", "nodes", "replicasets", "deployments"]
+  verbs: ["get", "watch", "list"]
+---
+# actual binding to the role
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: appinsight-logging-property-reader-binding
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: appinsight-logging-property-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: appinsight-logging
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: consoleapp
+  template:
+    metadata:
+      labels:
+        app: appinsight-logging
+        service: consoleapp
+    spec:
+      containers:
+      - name: appinsight-logging-container
+        image: appinsight-logging:dev
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Development"
+        - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+          value: "InstrumentationKey=;IngestionEndpoint="
